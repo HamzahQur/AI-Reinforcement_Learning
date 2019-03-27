@@ -12,7 +12,7 @@
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
 
-import mdp, util
+import sys, mdp, util
 
 from learningAgents import ValueEstimationAgent
 
@@ -44,7 +44,17 @@ class ValueIterationAgent(ValueEstimationAgent):
         self.values = util.Counter() # A Counter is a dict with default 0
 
         # Write value iteration code here
-        "*** YOUR CODE HERE ***"
+        for i in range(0, self.iterations):
+          counter = util.Counter()
+          for state in self.mdp.getStates():
+            max = -10000.0
+            for action in self.mdp.getPossibleActions(state):
+              q_value = self.computeQValueFromValues(state, action)
+              if q_value > max:
+                max = q_value
+              counter[state] = max
+          self.values = counter
+        
 
 
     def getValue(self, state):
@@ -60,7 +70,12 @@ class ValueIterationAgent(ValueEstimationAgent):
           value function stored in self.values.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        trans = self.mdp.getTransitionStatesAndProbs(state, action)
+        total = 0
+        for probability in trans:
+            reward = self.mdp.getReward(state, action, probability[0])
+            total += probability[1] * (reward + self.discount * self.values[probability[0]])
+        return total
 
     def computeActionFromValues(self, state):
         """
@@ -72,7 +87,15 @@ class ValueIterationAgent(ValueEstimationAgent):
           terminal state, you should return None.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        action = 0
+        max = -10000.0
+        for acts in self.mdp.getPossibleActions(state):
+          q = self.computeQValueFromValues(state, acts)
+          if q > max:
+            max = q
+            action = acts
+        return action
+
 
     def getPolicy(self, state):
         return self.computeActionFromValues(state)
